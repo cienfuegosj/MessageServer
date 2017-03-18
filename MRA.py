@@ -1,7 +1,7 @@
 # Messaging Request Admin
 
 class MRA:
-	# HI
+
 	def __init__(self):
 		self.MBX = {} # User Mailbox
 		self.IMQ = [] # Incoming Message Queue
