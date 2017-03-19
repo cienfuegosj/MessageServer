@@ -63,20 +63,13 @@ class ThreadedServer(object):
   		if self.MessageHandler.Store(username):
   			conn.send(b'OK\0')
   		else:
-  			conn.sendb('KO\0')
-  	elif "COUNT" in request:
-  		req,username = request.split(" ")
-  		if self.MessageHandler.Store(username):
-  			conn.send(b'OK\0')
-  		else:
   			conn.send(b'KO\0')
   	elif "COUNT" in request:
   		req,username = request.split(" ")
-  		msg_count = self.MessageHandler.Count(username)
-  		if msg_count != -1:
-  			conn.send(b"Counted {0}".format(msg_count))
+  		if self.MessageHandler.Count(username) != -1:
+  			conn.send(b'{0}\0'.format(self.MessageHandler.Count(username)))
   		else:
-  			conn.send(b'KO\0')
+  			conn.send(b'0\0')
   	elif "DELMSG" in request:
   		req,username = request.split(" ")
   		if self.MessageHandler.DelMsg(username):

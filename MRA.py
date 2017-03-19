@@ -15,9 +15,9 @@ class MRA:
 		
 	def Message(self, message):
 		self.IMQ.append(message)
-	
+
 	def Store(self, username):
-		if username in self.MBX.keys() and len(self.IMQ) != 0:
+		if username in self.MBX.keys() and len(self.IMQ) > 0:
 			self.MBX[username].append(self.IMQ.pop())
 			return True
 		else:
@@ -37,7 +37,7 @@ class MRA:
 			return False
 			
 	def GetMsg(self, username):
-		if username in self.MBX.keys() and len(self.MBX[username]) != 0:
+		if username in self.MBX.keys() and len(self.MBX[username]) > 0:
 			return self.MBX[username][0]
 		else:
 			return -1

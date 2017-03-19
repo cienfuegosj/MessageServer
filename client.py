@@ -3,9 +3,28 @@
 import socket
 import sys
 import time
+import atexit
 
 MSGLEN = 1
 
+def printInstructions():
+  
+  print("---------Welcome to Message Server--------")
+  print("These are your options:")
+  print("REGISTER <username>")
+  print("MESSAGE <message>")
+  print("STORE <username>")
+  print("COUNT <username>")
+  print("DELMSG <username>")
+  print("GETMSG <username>")
+  print("DUMP")
+  print("-------------------------------------------")
+  print("Click Ctrl-C to stop sending messages.")
+  return
+
+def exit_handler():
+  print("\nStopped Client")
+  
 # CONTRACT
 # get_message : socket -> string
 # Takes a socket and loops until it receives a complete message
@@ -37,12 +56,11 @@ def send (msg):
 def recv (sock):
   response = receive_message(sock)
   print("RESPONSE: [{0}]".format(response))
-  sock.close()  
+  
 
 def send_recv (msg):
   recv(send(msg))
   
-
 if __name__ == "__main__":
   # Check if the user provided all of the 
   # arguments. The script name counts
@@ -55,15 +73,15 @@ if __name__ == "__main__":
     print (" python client.py localhost 8888")
     print 
     sys.exit()
-
+    
+  atexit.register(exit_handler)
   host = sys.argv[1]
   port = int(sys.argv[2])
-  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  sock.connect((sys.argv[1], int(sys.argv[2])))
-
-  send_recv("DUMP")
-  send_recv("REGISTER cienfuegosj")
-  send_recv("DUMP")
-  send_recv("MESSAGE Hello from the other side!")
-  send_recv("MESSAGE What are you doing fam?")
-  send_recv("DUMP")
+  printInstructions()
+  
+  while True:
+    try:
+      selection = raw_input(">>> ")
+      send_recv(selection)
+    except KeyboardInterrupt:
+      sys.exit()
