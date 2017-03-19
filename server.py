@@ -1,4 +1,6 @@
 # Messaging Server
+# @author: Javier Cienfuegos
+# @author: Emmanuel Acheampong
 import socket
 import sys
 import atexit
