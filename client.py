@@ -2,6 +2,7 @@
 # @author: Matt Jadud
 import socket
 import sys
+import time
 
 MSGLEN = 1
 
@@ -24,6 +25,23 @@ def receive_message (sock):
         chars.append(char.decode("utf-8") )
   finally:
     return ''.join(chars)
+    
+def send (msg):
+  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  sock.connect((host, port))
+  length = sock.send(bytes(msg + "\0"))
+  print ("SENT MSG: '{0}'".format(msg))
+  print ("CHARACTERS SENT: [{0}]".format(length))
+  return sock
+  
+def recv (sock):
+  response = receive_message(sock)
+  print("RESPONSE: [{0}]".format(response))
+  sock.close()  
+
+def send_recv (msg):
+  recv(send(msg))
+  
 
 if __name__ == "__main__":
   # Check if the user provided all of the 
@@ -43,10 +61,9 @@ if __name__ == "__main__":
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   sock.connect((sys.argv[1], int(sys.argv[2])))
 
-  length = sock.send(b'DUMP\0')
-  print ("CHARACTERS SENT: [{0}]".format(length))
-
-  response = receive_message(sock)
-  print("RESPONSE: [{0}]".format(response))
-
-  sock.close()
+  send_recv("DUMP")
+  send_recv("REGISTER cienfuegosj")
+  send_recv("DUMP")
+  send_recv("MESSAGE Hello from the other side!")
+  send_recv("MESSAGE What are you doing fam?")
+  send_recv("DUMP")

@@ -15,14 +15,12 @@ class ThreadedServer(object):
     print("Running server on host [{0}] and port [{1}]".format(host, port))
 
   def listen(self):
-    self.sock.listen(5)
+    self.sock.listen(2)
 
     while True:
       connection, client_address = self.sock.accept()
       threading.Thread(target=self.handle_request, args=(connection, client_address)).start()
     
-    self.stop_server()
-  
 
   def handle_request(self,connection, client_address):
 		
@@ -58,7 +56,6 @@ class ThreadedServer(object):
   		message = ""
   		for i in range(1, wlen):
   			message += request.split(" ")[i] + " "
-  			
   		self.MessageHandler.Message(message)
   		conn.send(b'OK\0')
   	elif "STORE" in request:

@@ -1,7 +1,13 @@
 # Messaging Server
 import socket
 import sys
+import atexit
 from Server import ThreadedServer 
+
+def exit_handler():
+  print("\nStopped Socket Server...")
+  Server.stop_server()
+  
 
 if __name__ == "__main__":
 	# Check if the user provided all of the 
@@ -14,8 +20,12 @@ if __name__ == "__main__":
     print (" e.g. python server.py localhost 8888")
     print 
     sys.exit()
-
+  atexit.register(exit_handler)
   host = sys.argv[1]
   port = int(sys.argv[2])
-  Server = ThreadedServer(host, port)	
-  Server.listen()
+  try:
+    Server = ThreadedServer(host, port)	
+    Server.listen()
+  except KeyboardInterrupt:
+    exit()
+  
