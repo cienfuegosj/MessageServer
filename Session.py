@@ -9,5 +9,5 @@ class Session:
     self.sessionID = Session.numberofSessions + 1
     self.connection = connection
     self.client_address = client_address
-    print("Connection is of type ".format(type(self.connection)))
+    print("Connection is of type {0}".format(type(self.connection)))
    
