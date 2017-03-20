@@ -11,15 +11,16 @@ def printInstructions():
   
   print("---------Welcome to Message Server--------")
   print("These are your options:")
-  print("REGISTER <username>")
+  print("REGISTER <username> <password>")
   print("MESSAGE <message>")
   print("STORE <username>")
   print("COUNT <username>")
   print("DELMSG <username>")
   print("GETMSG <username>")
   print("DUMP")
+  print("CLOSE")
   print("-------------------------------------------")
-  print("Click Ctrl-C to stop sending messages.")
+  print("Click Ctrl-C or type CLOSE to stop sending messages.")
   return
 
 def exit_handler():
@@ -79,9 +80,14 @@ if __name__ == "__main__":
   port = int(sys.argv[2])
   printInstructions()
   
+  send_recv("CONNECT")
+  
   while True:
     try:
       selection = raw_input(">>> ")
+      if selection == "CLOSE":
+        send_recv(selection)
+        sys.exit()
       send_recv(selection)
     except KeyboardInterrupt:
       sys.exit()

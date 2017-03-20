@@ -4,7 +4,7 @@ import sys
 import atexit
 from Server import ThreadedServer 
 
-def exit_handler():
+def exit_handler(Server):
   print("\nStopped Socket Server...")
   Server.stop_server()
   
@@ -20,11 +20,11 @@ if __name__ == "__main__":
     print (" e.g. python server.py localhost 8888")
     print 
     sys.exit()
-  atexit.register(exit_handler)
   host = sys.argv[1]
   port = int(sys.argv[2])
   try:
     Server = ThreadedServer(host, port)	
+    atexit.register(exit_handler, Server)
     Server.listen()
   except KeyboardInterrupt:
     exit()
