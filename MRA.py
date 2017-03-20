@@ -5,26 +5,24 @@ class MRA:
 	def __init__(self):
 		self.MBX = {} # User Mailbox
 		self.IMQ = [] # Incoming Message Queue
-		self.users = {} # User Dictionary key = username; value = password
+		self.Users = {}
 		
-		
+	def Login(self, username, password):
+		if username in self.Users.keys() and password == self.Users[username]:
+			return True
+		elif username not in self.Users.keys():
+			raise ValueError("Username not found in database")
+		elif username in self.Users.keys() and password != self.Users[username]:
+			raise ValueError("Incorrect password. Try again")
+			
 	def Register(self, username, password):
 		if username in self.MBX.keys():
 			return False
 		else:
-			self.users[username] = (password, True)
+			self.Users[username] = password
 			self.MBX[username] = []
 			return True
-	
-	def Login(self, username, password):
-		if password == self.users[username] and not self.users[username][1]:
-			self.users[username][1] = True
-		elif password != self.users[username]:
-			raise ValueError("Incorrect password")
-		else:
-			raise ValueError("Already logged in")
-			
-	
+		
 	def Message(self, message):
 		self.IMQ.append(message)
 
@@ -57,3 +55,4 @@ class MRA:
 	def Dump(self):
 		print("Current IMQ: {0}".format(self.IMQ))
 		print("Current MBX: {0}".format(self.MBX))
+		

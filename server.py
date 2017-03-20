@@ -20,6 +20,7 @@ if __name__ == "__main__":
     print (" e.g. python server.py localhost 8888")
     print 
     sys.exit()
+
   host = sys.argv[1]
   port = int(sys.argv[2])
   try:

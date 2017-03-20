@@ -11,7 +11,7 @@ def printInstructions():
   
   print("---------Welcome to Message Server--------")
   print("These are your options:")
-  print("REGISTER <username> <password>")
+  print("REGISTER <username>")
   print("MESSAGE <message>")
   print("STORE <username>")
   print("COUNT <username>")

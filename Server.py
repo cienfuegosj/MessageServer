@@ -22,7 +22,7 @@ class ThreadedServer(object):
 			threading.Thread(target=self.handler, args=(connection, client_address)).start()
 
 			
-	def handler(self, connection, client_address):
+	def handler_firstlayer(self, connection, client_address):
 		print("Client address: [{0}]".format(client_address))
 		message = ""
 
@@ -56,7 +56,21 @@ class ThreadedServer(object):
 			else:
 				connection.send(b'KO\0')
 				
-		elif "MESSAGE" in message:
+	def handler_secondlayer(self, connection, client_address):
+		
+		print("Client address: [{0}]".format(client_address))
+		message = ""
+
+		while True:
+			char = connection.recv(1)
+			if char == b'\0':
+				break
+			elif char == b'':
+				break
+			else:
+				message += char.decode("utf-8")
+				
+		if "MESSAGE" in message:
 			req = message.split()[0]
 			mensaje = " ".join(message.split()[1:])
 			self.MessageHandler.Message(mensaje)
@@ -89,8 +103,10 @@ class ThreadedServer(object):
 			self.MessageHandler.Dump()
 			connection.send(b'OK\0')
 			
-		elif "CLOSE" in message:
+		elif "LOGOUT" in message:
 			connection.close()
+		else:
+			connection.send(b'Incorrect Syntax\0')
 			
 	def stop_server(self):
 		return self.sock.close()
