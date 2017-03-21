@@ -22,6 +22,11 @@ class MRA:
                 self.IMQ.append(message)
 
         def Store(self, username):
+		if username in self.MBX.keys() and len(self.IMQ) > 0:
+                        self.MBX[username].append(self.IMQ.pop())
+                        with open('messages.json', 'w') as outfile:
+                                json.dump(self.MBX,outfile)
+			return True
 		else:
 			return False
 			
