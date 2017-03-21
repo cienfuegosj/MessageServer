@@ -1,25 +1,27 @@
 # Messaging Request Admin
-
+import json
+import os.path
 class MRA:
 
-	def __init__(self):
-		self.MBX = {} # User Mailbox
-		self.IMQ = [] # Incoming Message Queue
-		
-	def Register(self, username):
-		if username in self.MBX.keys():
-			return False
-		else:
-			self.MBX[username] = []
-			return True
-		
-	def Message(self, message):
-		self.IMQ.append(message)
+        def __init__(self):
+                if os.path.isfile('messages.json'):
+                        with open('messages.json') as json_data:
+                                d = json.load(json_data)
+                else:
+                        self.MBX = {} # User Mailbox
+                        self.IMQ = [] # Incoming Message Queue
 
-	def Store(self, username):
-		if username in self.MBX.keys() and len(self.IMQ) > 0:
-			self.MBX[username].append(self.IMQ.pop())
-			return True
+        def Register(self, username):
+                if username in self.MBX.keys():
+                        return False
+                else:
+                        self.MBX[username] = []
+                        return True
+
+        def Message(self, message):
+                self.IMQ.append(message)
+
+        def Store(self, username):
 		else:
 			return False
 			
