@@ -23,6 +23,7 @@ class MRA:
 						with open('messages.json') as message_data:
 								self.MBX = json.load(message_data)
 								self.IMQ = []
+								print("MBX {0}".format(self.MBX))
 								
 						with open('users.json') as user_data:
 								self.Users = {}
@@ -31,12 +32,16 @@ class MRA:
 								# Recreate User objects to restore Users
 								for user in u.keys():
 									p_user = User(u[user][u'username'], u[user][u'password'], u[user][u'ID'], u[user][u'email'])
-									self.Users[u[user][u'ID']] = p_user
+									self.Users[u[user][u'username']] = p_user
 									
+								print("Users: {0}".format(self.Users))
 						with open('__meta__idactivity.json') as meta_data:
 								dict_unactive_active = json.load(meta_data)
 								self.unactive_UID = dict_unactive_active["unactive"]
 								self.active_UID = dict_unactive_active["active"]
+								
+								print("Un: {0}".format(self.unactive_UID))
+								print("Ac: {0}".format(self.active_UID))
 				else:
 						self.MBX = {} # User Mailbox
 						self.IMQ = [] # Incoming Message Queue
