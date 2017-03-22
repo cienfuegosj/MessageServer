@@ -1,13 +1,17 @@
 import sys
 import socket
+import threading
+import time
 
 class Session:
   
-  numberofSessions = 0
-  
-  def __init__(self,connection,client_address):
-    self.sessionID = Session.numberofSessions + 1
+  def __init__(self):
+    self.sessionID = 0
+    self.connection = None
+    self.client_address = None
+    self.userID = None
+    
+  def validate(self, connection, client_address, sessID):
     self.connection = connection
     self.client_address = client_address
-    print("Connection is of type {0}".format(type(self.connection)))
-   
+    self.sessionID = sessID
