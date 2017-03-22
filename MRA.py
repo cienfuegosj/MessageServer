@@ -50,12 +50,9 @@ class MRA:
 				else:
 						UID_int = self.unactive_UID.pop()
 						self.active_UID.append(UID_int)
-						with open("__meta__idactivity.json", 'w') as outfile:
-							json.dump({"unactive": self.unactive_UID, "active": self.active_UID}, outfile)
 						self.Users[username] = User(username, password, UID_int, email)
 						self.MBX[username] = []
-						with open('users.json', 'w') as outfile:
-								json.dump({user: self.Users[user].__dict__ for user in self.Users.keys()} ,outfile)
+						self.Update()
 						return True
 				
 		def Login(self, username, password):
@@ -71,12 +68,16 @@ class MRA:
 				
 				elif username in self.Users.keys() and self.Users[username].password != u'{0}'.format(password):
 						raise ValueError("Invalid Password")
+						
+				self.Update()
 
 		def Logout(self, username, password):
 				if u'{0}'.format(username) in self.Users.keys() and self.Users[username].password == u'{0}'.format(password):
 						self.Users[username].loggedIn = False
 				elif self.Users[username].password != password:
 						raise ValueError("Invalid Password")
+						
+				self.Update()
 
 		def Message(self, username, password, message):
 				if username in self.Users.keys() and self.Users[username].password == u'{0}'.format(password) and \
@@ -90,8 +91,7 @@ class MRA:
 				username in self.Users.keys() and self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
 						self.MBX[username].append(self.IMQ.pop())
-						with open('messages.json', 'w') as outfile:
-								json.dump(self.MBX,outfile)
+						self.Update()
 						return True
 				else:
 						return False
@@ -128,4 +128,11 @@ class MRA:
 						print("Current MBX: {0}".format(self.MBX))
 				else:
 						raise Logger
+		def Update(self):
+				with open('messages.json', 'w') as outfile:
+						json.dump(self.MBX,outfile)
+				with open("__meta__idactivity.json", 'w') as outfile:
+						json.dump({"unactive": self.unactive_UID, "active": self.active_UID}, outfile)
+				with open('users.json', 'w') as outfile:
+						json.dump({user: self.Users[user].__dict__ for user in self.Users.keys()} ,outfile)
 		
