@@ -1,16 +1,17 @@
 # Messaging Client
 # @author: Matt Jadud
-import socket
-import sys
-import time
-import atexit
+# @editors: Emmanuel & Javier
 
+import socket, sys, time, atexit
+from Exceptions import Loggedin, Registered, CRCException
+from pycrc.crc_algorithms import Crc
+
+# Globals | (MSGLEN) might be unnecessary
+crc = Crc(width=16, poly=0x8005,
+	reflect_in = True, xor_in = 0x0000,
+	reflect_out = True, xor_out = 0x0000)
 MSGLEN = 1
 
-class Loggedin(Exception):
-	pass
-class Registered(Exception):
-	pass
 
 def printInstructions():
 	
@@ -30,13 +31,17 @@ def printInstructions():
 def exit_handler():
 	print("\nStopped Client")
 	
+def generateCRC(message):
+	code = crc.bit_by_bit(str(message))
+	return hex(code)
+	
 # CONTRACT
 # get_message : socket -> string
 # Takes a socket and loops until it receives a complete message
 # from a client. Returns the string we were sent.
 # No error handling whatsoever.
 def receive_message (sock):
-	chars = []
+	message = ''
 	try:
 		while True:
 			char = sock.recv(1)
@@ -45,22 +50,25 @@ def receive_message (sock):
 			if char == b'':
 				break
 			else:
-				# print("Appending {0}".format(char))
-				chars.append(char.decode("utf-8") )
+				message += char.decode("utf-8")
 	finally:
-		return ''.join(chars)
+		return message
 		
 def send (msg):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((host, port))
 	
 	if msg == "REGISTER":
-		length = sock.send(bytes(" ".join([msg, username, password, email]) + "\0"))
+		x_codemsg = " ".join([msg, username, password, email])
+		code = generateCRC(x_codemsg)
+		length = sock.send(bytes(" ".join([code, msg, username, password, email]) + "\0"))
 		print ("SENT MSG: '{0}'".format(msg))
 		print ("CHARACTERS SENT: [{0}]".format(length))
 		return sock
 	else:
-		length = sock.send(bytes(" ".join([msg, username, password]) + "\0"))
+		x_codemsg = " ".join([msg, username, password])
+		code = generateCRC(x_codemsg)
+		length = sock.send(bytes(" ".join([code, msg, username, password]) + "\0"))
 		print ("SENT MSG: '{0}'".format(msg))
 		print ("CHARACTERS SENT: [{0}]".format(length))
 		return sock
@@ -80,6 +88,13 @@ def recv (sock):
 	elif response == "REGISTER FAILED":
 		print("RESPONSE: [{0}]".format(response))
 		raise Registered(0)
+	elif response == "LOGGED OUT":
+		print("RESPONSE: [{0}]".format(response))
+		raise Loggedin(-1)
+	elif response == "RETRY":
+		print("RESPONSE: [{0}]".format(response))
+		raise CRCException(-1)
+		
 		
 	print("RESPONSE: [{0}]".format(response))
 	
@@ -109,12 +124,13 @@ if __name__ == "__main__":
 	port = int(sys.argv[2])
 	
 	# Registration or Login
-	
 	regornah = int(raw_input("Enter 0 if you have an account. Enter 1 if you need to register: "))
 	if regornah == 0:
 		while True:
+			
 			username = raw_input("Please enter your username: ")
 			password = raw_input("Please enter your password: ")
+			
 			try:
 				send_recv("LOGIN")
 			except KeyboardInterrupt:
@@ -124,6 +140,8 @@ if __name__ == "__main__":
 						continue
 					else:
 						break
+			except CRCException:
+				continue
 	else:
 		username = raw_input("Create a new username: ")
 		email = raw_input("Enter your e-mail: ")
@@ -135,6 +153,8 @@ if __name__ == "__main__":
 				sys.exit()
 			except Registered:
 				break
+			except CRCException:
+				continue
 		while True:
 			try:
 				send_recv("LOGIN")
@@ -142,6 +162,8 @@ if __name__ == "__main__":
 				sys.exit()
 			except Loggedin:
 				break
+			except CRCException:
+				continue
 
 	printInstructions()
 	
@@ -152,4 +174,10 @@ if __name__ == "__main__":
 		except KeyboardInterrupt:
 			sys.exit()
 		except Loggedin as e:
-			continue
+			if e.message == 0 or e.message == 1:
+				continue
+			elif e.message == -1:
+				print("LOGIN AGAIN")
+		except CRCException:
+			print("RESENDING PREVIOUS COMMAND")
+			send_recv(selection)

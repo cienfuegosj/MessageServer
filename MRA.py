@@ -1,10 +1,6 @@
 # Messaging Request Admin
-import json
-import os.path
-import random
-
-class Logger(Exception):
-		pass
+import json, os.path, random, threading, time
+from Exceptions import Logger 
 
 class User:
 	
@@ -14,7 +10,21 @@ class User:
 				self.ID = ID
 				self.email = email
 				self.loggedIn = False		
+				self.timedOut = False
+				self.t_lastActive = time.time()
+				
+		def start(self):
+			threading.Thread(target=self.timeOut).start()
+				
+		def timeOut(self):
+			while abs(self.t_lastActive - time.time()) < 30:
+				continue
+			self.timedOut = True
+			self.loggedIn = False
 
+		def timeReset(self):
+			self.t_lastActive = time.time()
+			
 class MRA:
 
 		def __init__(self):
@@ -23,7 +33,6 @@ class MRA:
 						with open('messages.json') as message_data:
 								self.MBX = json.load(message_data)
 								self.IMQ = []
-								print("MBX {0}".format(self.MBX))
 								
 						with open('users.json') as user_data:
 								self.Users = {}
@@ -34,14 +43,11 @@ class MRA:
 									p_user = User(u[user][u'username'], u[user][u'password'], u[user][u'ID'], u[user][u'email'])
 									self.Users[u[user][u'username']] = p_user
 									
-								print("Users: {0}".format(self.Users))
 						with open('__meta__idactivity.json') as meta_data:
 								dict_unactive_active = json.load(meta_data)
 								self.unactive_UID = dict_unactive_active["unactive"]
 								self.active_UID = dict_unactive_active["active"]
 								
-								print("Un: {0}".format(self.unactive_UID))
-								print("Ac: {0}".format(self.active_UID))
 				else:
 						self.MBX = {} # User Mailbox
 						self.IMQ = [] # Incoming Message Queue
@@ -67,6 +73,9 @@ class MRA:
 	
 				elif username in self.Users.keys() and self.Users[username].password == password:
 						self.Users[username].loggedIn = True
+						self.Users[username].timedOut = False
+						self.Users[username].timeReset()
+						self.Users[username].start()
 			
 				elif username not in self.Users.keys():
 						raise ValueError("Invalid Username")
@@ -79,19 +88,35 @@ class MRA:
 		def Logout(self, username, password):
 				if u'{0}'.format(username) in self.Users.keys() and self.Users[username].password == u'{0}'.format(password):
 						self.Users[username].loggedIn = False
+						self.Users[username].timedOut = False
 				elif self.Users[username].password != password:
 						raise ValueError("Invalid Password")
 						
 				self.Update()
 
 		def Message(self, username, password, message):
-				if username in self.Users.keys() and self.Users[username].password == u'{0}'.format(password) and \
-				self.Users[username].loggedIn == True:
-						self.IMQ.append(message)
+			
+				# Check whether the client has passed the time limit for an active session
+				# Otherwise, reset the time active time and complete the client's command
+				
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
 				else:
-						raise Logger
+					 raise Logger(-1)
+				
+				if username in self.Users.keys() and self.Users[username].password == u'{0}'.format(password):
+					if self.Users[username].loggedIn == True:
+						self.IMQ.append(message)
+					else:
+						raise Logger(0)
 
 		def Store(self, username, password):
+			
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
+				else:
+					 raise Logger(-1)
+			
 				if username in self.MBX.keys() and len(self.IMQ) > 0 and \
 				username in self.Users.keys() and self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
@@ -102,6 +127,12 @@ class MRA:
 						return False
 			
 		def Count(self, username, password):
+			
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
+				else:
+					 raise Logger(-1)
+			
 				if username in self.MBX.keys() and username in self.Users.keys() and \
 				self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
@@ -111,6 +142,12 @@ class MRA:
 						
 			
 		def DelMsg(self, username, password):
+			
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
+				else:
+					 raise Logger(-1)
+			
 				if username in self.MBX.keys() and len(self.MBX[username]) > 0 and \
 				self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
@@ -120,6 +157,12 @@ class MRA:
 						return False
 			
 		def GetMsg(self, username, password):
+			
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
+				else:
+					 raise Logger(-1)
+			
 				if username in self.MBX.keys() and len(self.MBX[username]) > 0 and \
 				self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
@@ -127,12 +170,18 @@ class MRA:
 				else:
 						return -1
 		def Dump(self, username, password):
+			
+				if not self.Users[username].timedOut:
+					self.Users[username].timeReset()
+				else:
+					 raise Logger(-1)
+			
 				if self.Users[username].password == password and \
 				self.Users[username].loggedIn == True:
 						print("Current IMQ: {0}".format(self.IMQ))
 						print("Current MBX: {0}".format(self.MBX))
 				else:
-						raise Logger
+						raise Logger(0)
 		def Update(self):
 				with open('messages.json', 'w') as outfile:
 						json.dump(self.MBX,outfile)
