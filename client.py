@@ -1,7 +1,6 @@
 # Messaging Client
 # @author: Matt Jadud
 # @editors: Emmanuel & Javier
-
 import socket, sys, time, atexit
 from Exceptions import Loggedin, Registered, CRCException
 from pycrc.crc_algorithms import Crc

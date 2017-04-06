@@ -1,3 +1,5 @@
+# Backend Server
+# @authors: Emmanuel & Javier
 import socket, threading, sys, MRA
 from pycrc.crc_algorithms import Crc
 	

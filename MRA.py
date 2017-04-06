@@ -1,4 +1,5 @@
-# Messaging Request Admin
+# Message Request Administrator 
+# authors: Emmanuel & Javier
 import json, os.path, random, threading, time
 from Exceptions import Logger 
 

@@ -1,4 +1,5 @@
-# Messaging Server
+# Frontend Server
+# @authors: Emmanuel & Javier
 import socket, sys, atexit
 from Server import ThreadedServer 
 

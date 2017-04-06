@@ -1,5 +1,5 @@
+# Exceptions Class Library
 # @author: Javier Cienfuegos & Emmanuel Acheampong
-
 class Loggedin(Exception):
 	'''
 	-1 suggests that the user has logged out.
