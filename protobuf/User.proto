@@ -1,0 +1,15 @@
+package User;
+
+message User {
+    required string username = 1;
+    required string password = 2;
+    required int32 ID = 3;
+    required string email = 4;
+    required bool loggedIn = 5;
+    required bool timedOut = 6;
+    required float t_lastActive = 7;
+}
+
+message Users {
+    repeated User user = 1;
+}

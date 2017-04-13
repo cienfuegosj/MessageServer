@@ -1,0 +1,10 @@
+package messages;
+
+message MBX {
+    required string username = 1;
+    repeated string l_messages = 2;
+}
+
+message IMQ {
+    repeated string l_imq = 1;
+}
